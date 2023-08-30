@@ -1,0 +1,15 @@
+#lang racket
+(define (spower n x)
+  (cond
+    ((= n 0) 1)
+    ((even? n) `(sqr ,(spower (/ n 2) x)))
+    (else `(* ,x ,(spower (- n 1) x)))))
+(define (spowern n)
+  `(lambda (x)
+     ,(spower n 'x)))
+;; > (spowern 10)
+;; '(lambda (x) (sqr (* x (sqr (sqr (* x 1))))))
+;; > (spowern 100)
+;; '(lambda (x) (sqr (sqr (* x (sqr (sqr (sqr (* x (sqr (* x 1))))))))))
+;; > (spowern 1000)
+;; '(lambda (x) (sqr (sqr (sqr (* x (sqr (sqr (* x (sqr (* x (sqr (* x (sqr (* x (sqr (* x 1))))))))))))))))
