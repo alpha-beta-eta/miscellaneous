@@ -1,0 +1,30 @@
+#lang racket
+(require "match.rkt")
+(define (diff exp var)
+  (match exp
+    (,n (guard (number? n)) 0)
+    (,x (guard (symbol? x)) (if (eq? x var) 1 0))
+    ((+ ,a ,b) `(+ ,(diff a var) ,(diff b var)))
+    ((* ,a ,b) `(+ (* ,(diff a var) ,b)
+                   (* ,a ,(diff b var))))))
+(define (simp exp)
+  (match exp
+    ((+ ,a ,b)
+     (let ((a (simp a))
+           (b (simp b)))
+       (cond
+         ((and (number? a) (number? b)) (+ a b))
+         ((equal? a 0) b)
+         ((equal? b 0) a)
+         (else `(+ ,a ,b)))))
+    ((* ,a ,b)
+     (let ((a (simp a))
+           (b (simp b)))
+       (cond
+         ((and (number? a) (number? b)) (* a b))
+         ((equal? a 0) 0)
+         ((equal? b 0) 0)
+         ((equal? a 1) b)
+         ((equal? b 1) a)
+         (else `(* ,a ,b)))))
+    (,else exp)))
