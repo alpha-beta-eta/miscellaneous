@@ -6,22 +6,24 @@
 ;       |  (+ <exp> <exp>) : union
 ;       |  (* <exp> <exp>) : concatenation
 ;       |  (k <exp>) : kleene star
+(define zero 'zero)
+(define one 'one)
 (define (+ e1 e2)
   (cond
-    ((eq? e1 'zero) e2)
-    ((eq? e2 'zero) e1)
+    ((eq? e1 zero) e2)
+    ((eq? e2 zero) e1)
     (else `(+ ,e1 ,e2))))
 (define (* e1 e2)
   (cond
-    ((eq? e1 'zero) 'zero)
-    ((eq? e2 'zero) 'zero)
-    ((eq? e1 'one) e2)
-    ((eq? e2 'one) e1)
+    ((eq? e1 zero) zero)
+    ((eq? e2 zero) zero)
+    ((eq? e1 one) e2)
+    ((eq? e2 one) e1)
     (else `(* ,e1 ,e2))))
 (define (k exp)
   (cond
-    ((eq? exp 'zero) 'one)
-    ((eq? exp 'one) 'one)
+    ((eq? exp zero) one)
+    ((eq? exp one) one)
     (else `(k ,exp))))
 (define (delta? exp)
   (match exp
@@ -45,11 +47,11 @@
     ((k ,e) #f)))
 (define (D exp c)
   (match exp
-    (zero 'zero)
-    (one 'zero)
+    (zero zero)
+    (one zero)
     (,c^
      (guard (char? c^))
-     (if (char=? c^ c) 'one 'zero))
+     (if (char=? c^ c) one zero))
     ((+ ,e1 ,e2) (+ (D e1 c) (D e2 c)))
     ((* ,e1 ,e2)
      (if (delta? e1)
