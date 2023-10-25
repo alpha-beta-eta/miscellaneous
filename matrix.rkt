@@ -29,6 +29,14 @@
   (vector-map vector-copy m))
 (define (matrix-map p m)
   (vector-map (lambda (row) (vector-map p row)) m))
+(define (matrix-mapij p m)
+  (vector-mapi
+   (lambda (row i)
+     (vector-mapi
+      (lambda (x j)
+        (p x i j))
+      row))
+   m))
 (define (transpose m)
   (build-matrix
    (ncols m) (nrows m)
