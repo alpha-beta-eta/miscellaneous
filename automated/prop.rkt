@@ -47,6 +47,10 @@
   (allv (curry ev e)
         (lambda (x) #f)
         (atoms e)))
+;; > (tautology?
+;;    '(=> (=> p q)
+;;         (<=> (and p q) p)))
+;; #t
 (define (unsatisfiable? e)
   (tautology? `(not ,e)))
 (define (satisfiable? e)
@@ -536,6 +540,23 @@
               (offset k x) (offset k y) (offset k c0) (offset k c1)
               (offset k s0) (offset k s1) (offset k c) (offset k s)
               (- n k) k))))
+(define (carryselect^ x y c0 c1 s0 s1 c s n k)
+  (define k^ (min n k))
+  (define exp0
+    `(and (and ,(ripplecarry0 x y c0 s0 k^)
+               ,(ripplecarry1 x y c1 s1 k^))
+          (and (<=> ,(c k^) ,(mux (c 0) (c0 k^) (c1 k^)))
+               ,(conjoin
+                 (lambda (i)
+                   `(<=> ,(s i) ,(mux (c 0) (s0 i) (s1 i))))
+                 (range k^)))))
+  (if (< k^ k)
+      exp0
+      `(and ,exp0
+            ,(carryselect^
+              (offset k x) (offset k y) (offset k c0) (offset k c1)
+              (offset k s0) (offset k s1) (offset k c) (offset k s)
+              (- n k) k))))
 (define (make-adder-test n k)
   `(=> (and (and ,(carryselect X_ Y_ C0_ C1_ S0_ S1_ C_ S_ n k)
                  (not ,(C_ 0)))
@@ -547,3 +568,11 @@
                 `(<=> ,(S_ i) ,(S2_ i)))
               (range n)))))
 ;(dplltaut? (make-adder-test 5 3))
+;> (psimplify (carryselect X_ Y_ C0_ C1_ S0_ S1_ C_ S_ 0 1))
+;'(<=> C_0 (or (and (not C_0) C0_0) (and C_0 C1_0)))
+;; > (define test0
+;;     `(=> (and (<=> c_2k ,(mux 'c_k 'c0_2k 'c1_2k))
+;;               (=> c0_2k c1_2k))
+;;          (<=> c_2k ,(mux 'c_2k 'c0_2k 'c1_2k))))
+;; > (tautology? test0)
+;; #t
